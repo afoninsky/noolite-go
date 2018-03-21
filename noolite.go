@@ -4,6 +4,7 @@ import (
 	"github.com/google/gousb"
 )
 
+// Noolite ..
 type Noolite struct {
 	ctx  *gousb.Context
 	intf *gousb.Interface
@@ -11,11 +12,13 @@ type Noolite struct {
 	out  *gousb.OutEndpoint
 }
 
+// Close ...
 func (device *Noolite) Close() {
 	device.ctx.Close()
 	// device.intf.Close()
 }
 
+// New ...
 func New(vid, pid int) (*Noolite, error) {
 	noolite := Noolite{}
 	vID, pID := gousb.ID(vid), gousb.ID(pid)

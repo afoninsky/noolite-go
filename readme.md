@@ -2,8 +2,7 @@
 https://www.noo.com.by/assets/files/PDF/MTRF-64-USB.pdf
 
 ### Running on macOS
-https://github.com/libusb/libusb/wiki/FAQ#how-can-i-run-libusb-applications-under-mac-os-x-if-there-is-already-a-kernel-extension-installed-for-the-device
-
+`libusb: bad access [code -3]` fix:
 ```
 kextstat | grep -i ftdi
 sudo kextunload -b com.FTDI.driver.FTDIUSBSerialDriver

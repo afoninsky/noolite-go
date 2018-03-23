@@ -1,11 +1,13 @@
 package noolite
 
-// func TestDebug(t *testing.T) {
-// 	// device, err := New(0x0403, 0x6001)
-// 	// if err != nil {
-// 	// 	t.Error(err)
-// 	// }
-// 	// device.Close()
-// 	// fmt.Printf("%v", device)
+import (
+	"testing"
+)
 
-// }
+func TestDebug(t *testing.T) {
+	_, createError := CreateDevice()
+	if createError != nil {
+		t.Error(createError)
+	}
+
+}

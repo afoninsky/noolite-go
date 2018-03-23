@@ -1,51 +1,78 @@
 package noolite
 
 import (
-	"github.com/google/gousb"
+	"errors"
+	"io"
+
+	"github.com/jacobsa/go-serial/serial"
 )
 
-// Noolite ..
-type Noolite struct {
-	ctx  *gousb.Context
-	intf *gousb.Interface
-	in   *gousb.InEndpoint
-	out  *gousb.OutEndpoint
+// Device ...
+type Device struct {
+	port    io.ReadWriteCloser // usb interface
+	address [4]byte            // MTRF adapter address
 }
 
-// Close ...
-func (device *Noolite) Close() {
-	device.ctx.Close()
-	// device.intf.Close()
+// Send raw packets
+func (device *Device) Send(mode, control, channel, command byte) error {
+	packet := Packet{
+		mode:    mode,
+		control: control,
+		channel: channel,
+		command: command,
+	}
+	count, err := device.port.Write(packet.Encode())
+	if err != nil {
+		return err
+	}
+	if count != PacketLength {
+		return errors.New(".Send: invalid amout of bytes written")
+	}
+	return nil
 }
 
-// New ...
-func New(vid, pid int) (*Noolite, error) {
-	noolite := Noolite{}
-	vID, pID := gousb.ID(vid), gousb.ID(pid)
-	noolite.ctx = gousb.NewContext()
-	dev, openErr := noolite.ctx.OpenDeviceWithVIDPID(vID, pID)
-	if openErr != nil {
-		return nil, openErr
+// Receive ...
+func (device *Device) Receive() (Packet, error) {
+	packet := Packet{}
+	buf := make([]byte, PacketLength)
+	if _, readError := io.ReadFull(device.port, buf); readError != nil {
+		return packet, readError
 	}
-	intf, _, openIntfErr := dev.DefaultInterface()
-	if openIntfErr != nil {
-		return nil, openIntfErr
+	if decodeError := packet.Decode(buf); decodeError != nil {
+		return packet, decodeError
 	}
-	noolite.intf = intf
+	return packet, nil
+}
 
-	// MTRF-64-USB default in endpoind
-	in, inErr := intf.InEndpoint(1)
-	if inErr != nil {
-		return nil, inErr
+// CreateDevice ...
+func CreateDevice() (Device, error) {
+	device := Device{}
+	options := serial.OpenOptions{
+		PortName:        "/dev/tty.usbserial-AL032Z5Y",
+		BaudRate:        9600,
+		DataBits:        8,
+		StopBits:        1,
+		MinimumReadSize: 4,
 	}
-
-	// MTRF-64-USB default out endpoind
-	out, outErr := intf.OutEndpoint(2)
-	if outErr != nil {
-		return nil, outErr
+	port, openError := serial.Open(options)
+	if openError != nil {
+		return device, openError
 	}
-	noolite.in = in
-	noolite.out = out
+	device.port = port
 
-	return &noolite, nil
+	// switch to main (service) mode after device start
+	if sendError := device.Send(ModeSvc, 0, 0, 0); sendError != nil {
+		port.Close()
+		return device, sendError
+	}
+	answer, receiveError := device.Receive()
+	if receiveError != nil {
+		return device, receiveError
+	}
+	if answer.mode != ModeSvc {
+		return device, errors.New("device is not entered into service mode")
+	}
+	device.address = answer.address
+
+	return device, nil
 }

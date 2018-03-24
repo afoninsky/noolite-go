@@ -22,17 +22,17 @@ func TestBindRemote(t *testing.T) {
 	ethalonRxBind[15] = crc(ethalonRxBind[:15])
 
 	remote := &Packet{
-		mode:    ModeFTx,
-		control: TxCtrSnd,
-		channel: 5,
-		command: CmdService,
+		Mode:    ModeFTx,
+		Control: TxCtrSnd,
+		Channel: 5,
+		Command: CmdService,
 	}
 
 	bind := &Packet{
-		mode:    ModeFTx,
-		control: TxCtrSnd,
-		channel: 10,
-		command: CmdBind,
+		Mode:    ModeFTx,
+		Control: TxCtrSnd,
+		Channel: 10,
+		Command: CmdBind,
 	}
 
 	receive := &Packet{}
@@ -48,12 +48,12 @@ func TestBindRemote(t *testing.T) {
 	if rxErr := receive.Decode(ethalonRxBind); rxErr != nil {
 		t.Error(rxErr)
 	}
-	assertEqual(t, receive.mode, ModeFTx)
-	assertEqual(t, receive.control, RxCtrBindCommplete)
-	assertEqual(t, receive.toggle, byte(0))
-	assertEqual(t, receive.channel, byte(5))
-	assertEqual(t, receive.command, CmdSendState)
-	assertEqual(t, receive.dataFormat, byte(0))
+	assertEqual(t, receive.Mode, ModeFTx)
+	assertEqual(t, receive.Control, RxCtrBindCommplete)
+	assertEqual(t, receive.Toggle, byte(0))
+	assertEqual(t, receive.Channel, byte(5))
+	assertEqual(t, receive.Command, CmdSendState)
+	assertEqual(t, receive.DataFormat, byte(0))
 
 }
 
@@ -64,9 +64,9 @@ func TestBindLocal(t *testing.T) {
 	ethalonTxBind := []byte{171, 1, 3, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 180, 172}
 
 	bind := &Packet{
-		mode:    ModeRx,
-		control: TxCtrBindOn,
-		channel: 5,
+		Mode:    ModeRx,
+		Control: TxCtrBindOn,
+		Channel: 5,
 	}
 
 	if bindEqual := reflect.DeepEqual(ethalonTxBind, bind.Encode()); !bindEqual {
@@ -82,15 +82,15 @@ func TestClearChannels(t *testing.T) {
 	ethalonClearNooliteF := []byte{171, 3, 6, 0, 0, 0, 0, 170, 85, 170, 85, 0, 0, 0, 0, 178, 172}
 
 	clear := &Packet{
-		mode:    ModeRx,
-		control: TxCtrClearAll,
-		address: receiver,
+		Mode:    ModeRx,
+		Control: TxCtrClearAll,
+		Address: receiver,
 	}
 
 	clearF := &Packet{
-		mode:    ModeFRx,
-		control: TxCtrClearAll,
-		address: receiver,
+		Mode:    ModeFRx,
+		Control: TxCtrClearAll,
+		Address: receiver,
 	}
 
 	if clearEqual := reflect.DeepEqual(ethalonClearNoolite, clear.Encode()); !clearEqual {
@@ -108,17 +108,17 @@ func TestSendOnOff(t *testing.T) {
 	ethalonOffBroadcast := []byte{171, 2, 1, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 184, 172}
 
 	onSingle := &Packet{
-		mode:    ModeFTx,
-		control: TxCtrSnd,
-		command: CmdOn,
-		channel: 10,
+		Mode:    ModeFTx,
+		Control: TxCtrSnd,
+		Command: CmdOn,
+		Channel: 10,
 	}
 
 	offBroadcast := &Packet{
-		mode:    ModeFTx,
-		control: TxCtrSndAll,
-		command: CmdOff,
-		channel: 10,
+		Mode:    ModeFTx,
+		Control: TxCtrSndAll,
+		Command: CmdOff,
+		Channel: 10,
 	}
 
 	if onSingleEqual := reflect.DeepEqual(ethalonOnSingle, onSingle.Encode()); !onSingleEqual {

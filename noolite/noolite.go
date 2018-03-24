@@ -70,17 +70,22 @@ func (device *Device) Receive() (Packet, error) {
 	return packet, nil
 }
 
-func (device *Device) enterServiceMode() error {
-	if sendError := device.Send(ModeSvc, 0, 0, 0); sendError != nil {
-		return sendError
-	}
-	answer, receiveError := device.Receive()
-	if receiveError != nil {
-		return receiveError
-	}
-	if answer.Mode != ModeSvc {
-		return errors.New("device is not entered into service state")
-	}
-	device.Address = answer.Address
-	return nil
+// func (device *Device) enterServiceMode() error {
+// 	if sendError := device.Send(ModeSvc, 0, 0, 0); sendError != nil {
+// 		return sendError
+// 	}
+// 	answer, receiveError := device.Receive()
+// 	if receiveError != nil {
+// 		return receiveError
+// 	}
+// 	if answer.Mode != ModeSvc {
+// 		return errors.New("device is not entered into service state")
+// 	}
+// 	device.Address = answer.Address
+// 	return nil
+// }
+
+// Close ...
+func (device *Device) Close() {
+	device.Port.Close()
 }

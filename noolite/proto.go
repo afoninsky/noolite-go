@@ -16,15 +16,15 @@ const (
 
 // Packet contains incoming decoded data OR decode data for send
 type Packet struct {
-	mode       byte    // <-> adapter mode
-	control    byte    // <-> adapter control commands
-	channel    byte    // <-> channel address
-	command    byte    // <-> command
-	address    [4]byte // <-> nooliteF device address
-	repeat     byte    // -> amount of repeats + 2 {not realized}
-	dataFormat byte    // <- format of incoming data
-	data       [4]byte // <- incoming data
-	toggle     byte    // <- nooliteF-tx - amount of packets to receive, nooliteF-rx/noolite - unique command id
+	Mode       byte    // <-> adapter mode
+	Control    byte    // <-> adapter control commands
+	Channel    byte    // <-> channel address
+	Command    byte    // <-> command
+	Address    [4]byte // <-> nooliteF device address
+	Repeat     byte    // -> amount of repeats + 2 {not realized}
+	DataFormat byte    // <- format of incoming data
+	Data       [4]byte // <- incoming data
+	Toggle     byte    // <- nooliteF-tx - amount of packets to receive, nooliteF-rx/noolite - unique command id
 }
 
 func crc(input []byte) byte {
@@ -37,13 +37,13 @@ func crc(input []byte) byte {
 
 // Encode creates rx packet for MTRF device
 func (p Packet) Encode() []byte {
-	buf := []byte{txStart, 0, p.control, 0, p.channel, p.command, 0, p.address[0], p.address[1], p.address[2], p.address[3], 0, 0, 0, 0, 0, txStop}
+	buf := []byte{txStart, 0, p.Control, 0, p.Channel, p.Command, 0, p.Address[0], p.Address[1], p.Address[2], p.Address[3], 0, 0, 0, 0, 0, txStop}
 
 	// add mode + repeats flag
-	buf[1] = (p.repeat << 6) | p.mode
+	buf[1] = (p.Repeat << 6) | p.Mode
 
 	// enable service mode flag in case of service command
-	if p.command == CmdService {
+	if p.Command == CmdService {
 		buf[7] = 1
 	}
 	buf[15] = crc(buf[:15])
@@ -59,14 +59,14 @@ func (p *Packet) Decode(buf []byte) error {
 		return errors.New(".Decode: invalid crc")
 	}
 
-	p.mode = buf[1]
-	p.control = buf[2]
-	p.toggle = buf[3]
-	p.channel = buf[4]
-	p.command = buf[5]
-	p.dataFormat = buf[6]
-	p.data = [4]byte{buf[7], buf[8], buf[9], buf[10]}
-	p.address = [4]byte{buf[11], buf[12], buf[13], buf[14]}
+	p.Mode = buf[1]
+	p.Control = buf[2]
+	p.Toggle = buf[3]
+	p.Channel = buf[4]
+	p.Command = buf[5]
+	p.DataFormat = buf[6]
+	p.Data = [4]byte{buf[7], buf[8], buf[9], buf[10]}
+	p.Address = [4]byte{buf[11], buf[12], buf[13], buf[14]}
 
 	return nil
 }

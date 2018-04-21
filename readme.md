@@ -18,3 +18,8 @@ Then add your user to noolite group:
 ```
 sudo usermod <user> -aG noolite
 ```
+
+
+# mosquitto_pub -t "home/noolite_test/status" -m "online"
+# mosquitto_pub -t "home/noolite_test/set" -m '{"state": "ON"}'
+# mosquitto_pub -t "home/noolite_test/state" -m '{"state": "ON"}'

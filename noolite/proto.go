@@ -46,6 +46,8 @@ func (p Packet) Encode() []byte {
 	if p.Command == CmdService {
 		buf[7] = 1
 	}
+
+	// count crc
 	buf[15] = crc(buf[:15])
 	return buf
 }

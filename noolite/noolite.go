@@ -40,13 +40,7 @@ func CreateDevice() (Device, error) {
 }
 
 // Send raw packets
-func (device *Device) Send(mode, control, channel, command byte) error {
-	packet := Packet{
-		Mode:    mode,
-		Control: control,
-		Channel: channel,
-		Command: command,
-	}
+func (device *Device) Send(packet Packet) error {
 	count, err := device.Port.Write(packet.Encode())
 	if err != nil {
 		return err

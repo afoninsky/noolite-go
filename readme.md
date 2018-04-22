@@ -20,6 +20,6 @@ sudo usermod <user> -aG noolite
 ```
 
 
-# mosquitto_pub -t "home/noolite_test/status" -m "online"
-# mosquitto_pub -t "home/noolite_test/set" -m '{"state": "ON"}'
-# mosquitto_pub -t "home/noolite_test/state" -m '{"state": "ON"}'
+# mosquitto_pub -t "home/noolite_test/status" -m online
+# mosquitto_pub -t "home/noolite_test/set" -m ON
+# mosquitto_pub -t "home/noolite_test/state" -m ON

@@ -8,4 +8,3 @@ const nooliteFID = "noolitef"
 const willOnlineMessage = "online"
 const willOfflineMessage = "offline"
 const clientID = "noolite"
-const maxChannelsLength = 64

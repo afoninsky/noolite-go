@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"strconv"
+	"log"
 	"strings"
 
 	"github.com/afoninsky/noolite-go/noolite"
@@ -15,91 +15,84 @@ type Server struct {
 }
 
 func (s *Server) messageHandler(topicName, message []byte) {
-	parts := strings.Split(string(topicName), "/")
+	topicParts := strings.SplitN(string(topicName), "/", 4)
 	packet := noolite.Packet{}
 
 	// detect device type
-	switch parts[1] {
+	switch topicParts[1] {
 	case nooliteID:
 		packet.Mode = noolite.ModeTx
 	case nooliteFID:
 		packet.Mode = noolite.ModeFTx
 	default:
-		fmt.Println("expected noolite or noolitef device types but found:", parts[2])
+		log.Printf("ERROR: expected noolite or noolitef device types but found - %s", topicParts[1])
 		return
 	}
 
 	// get device channel
-	channel, convErr := strconv.Atoi(parts[2])
-	if convErr != nil || channel < 0 || channel > maxChannelsLength-1 {
-		fmt.Println("invalid device channel:", parts[2])
+	channel, convErr := validateByteRange(topicParts[2])
+	if convErr != nil {
+		log.Printf("ERROR: invalid device channel - %s", topicParts[2])
 		return
 	}
-	packet.Channel = byte(channel)
+	packet.Channel = channel
 
-	command := strings.ToUpper(fmt.Sprintf("%s", message))
+	// handle logic based on passed payload
+	command, payload := guessCommand(message)
+
 	switch command {
-
+	// enters device into bind mode
 	case "BIND":
-
+		packet.Control = noolite.TxCtrSnd
 		if packet.Mode == noolite.ModeTx {
-			// mosquitto_pub -t "home/noolite/0/set" -m bind
-			// enters device into bind mode (old mode)
-			bind := packet
-			bind.Control = noolite.TxCtrSnd
-			bind.Command = noolite.TxCtrBindOn
-			if err := s.noolite.Send(bind); err != nil {
-				fmt.Println(err)
+			packet.Command = noolite.TxCtrBindOn
+		} else {
+			packet.Command = noolite.CmdBind
+		}
+
+	// turns device on
+	case "ON":
+		packet.Command = noolite.CmdOn
+
+	// turns device off
+	case "OFF":
+		packet.Command = noolite.CmdOff
+
+	// set brightness
+	case "BRIGHTNESS":
+		brightness, err := validateByteRange(payload)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		packet.Command = noolite.CmdSetBrightness
+		packet.Data[0] = scaleBrightness(brightness)
+		packet.DataFormat = 1
+
+	// set rgb
+	case "RGB":
+		packet.Command = noolite.CmdSetBrightness
+		packet.DataFormat = 3
+		for key, value := range strings.SplitN(payload, ",", 3) {
+			channel, err := validateByteRange(value)
+			if err != nil {
+				log.Printf("Error: %s", err)
 				return
 			}
-
-		} else {
-			// set command "bind remotely"
-			remote := packet
-			remote.Command = noolite.CmdService
-
-			// perform binding
-			bind := packet
-			bind.Command = noolite.CmdBind
-			// 2do: send both commands
+			packet.Data[key] = channel
 		}
 
-	case "ON": // turns device on
-		on := packet
-		on.Command = noolite.CmdOn
-		if err := s.noolite.Send(on); err != nil {
-			fmt.Println(err)
-			return
-		}
-	case "OFF": // turns device off
-		off := packet
-		off.Command = noolite.CmdOff
-		if err := s.noolite.Send(off); err != nil {
-			fmt.Println(err)
-			return
-		}
 	default:
-		// check if its brightness
-		// brightness, err := strconv.Atoi(command)
-		// 2do: brightness mode, rgb mode
-
-		// if err == nil && brightness >= 0 && brightness <= 255 {
-		// 	bri := packet
-		// 	// set brightness
-		// 	bri.Command = noolite.CmdSetBrightness
-		// 	// 2do 0..155
-		// 	if err := s.noolite.Send(bri); err != nil {
-		// 		fmt.Println(err)
-		// 		return
-		// 	}
-		// 	return
-		// }
-		// inform command does not supported
-		fmt.Println("command does not supported:", command)
+		log.Printf("ERROR: command does not supported - %s", command)
 		return
 	}
 
-	fmt.Println("command", command, "sets on channel", channel)
+	if err := s.noolite.Send(packet); err != nil {
+		log.Printf("ERROR: while sending packet - %s", err)
+		return
+	}
+
+	log.Printf("[SUCCESS] command %s sets on channel %v", command, channel)
 
 	// // send the current state
 	// if packet.Mode == noolite.ModeTx {

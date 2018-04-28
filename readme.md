@@ -19,7 +19,6 @@ Then add your user to noolite group:
 sudo usermod <user> -aG noolite
 ```
 
-
-# mosquitto_pub -t "home/noolite_test/status" -m online
-# mosquitto_pub -t "home/noolite_test/set" -m ON
-# mosquitto_pub -t "home/noolite_test/state" -m ON
+ docker run -p 1883:1883 eclipse-mosquitto
+mosquitto_sub -v -t "#"mosquitto_pub -t "home/noolite_test/set" -m ON
+mosquitto_pub -t "home/noolitef/1/command" -m ON

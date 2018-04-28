@@ -75,11 +75,11 @@ func TestBindLocal(t *testing.T) {
 
 }
 
-// // completly unbind all channels from adapter
+// completly unbind all channels from adapter
 func TestClearChannels(t *testing.T) {
 	receiver := [4]byte{170, 85, 170, 85}
-	ethalonClearNoolite := []byte{171, 1, 6, 0, 0, 0, 0, 170, 85, 170, 85, 0, 0, 0, 0, 176, 172}
-	ethalonClearNooliteF := []byte{171, 3, 6, 0, 0, 0, 0, 170, 85, 170, 85, 0, 0, 0, 0, 178, 172}
+	ethalonClearNoolite := []byte{171, 1, 6, 0, 0, 0, 0, 0, 0, 0, 0, 170, 85, 170, 85, 176, 172}
+	ethalonClearNooliteF := []byte{171, 3, 6, 0, 0, 0, 0, 0, 0, 0, 0, 170, 85, 170, 85, 178, 172}
 
 	clear := &Packet{
 		Mode:    ModeRx,

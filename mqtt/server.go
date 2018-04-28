@@ -52,7 +52,7 @@ func main() {
 
 	server := &Server{noolite: &nooDevice, mqtt: cli}
 
-	// listen for commands
+	// listen for incoming commands
 	if err := cli.Subscribe(&client.SubscribeOptions{
 		SubReqs: []*client.SubReq{
 			&client.SubReq{
@@ -65,7 +65,26 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	// send online message intp status topic
+	// wait for events in bus
+	// go func() {
+	// 	for {
+	// 		input, rcvErr := server.noolite.Receive()
+	// 		if rcvErr != nil {
+	// 			log.Println(rcvErr)
+	// 			return
+	// 		}
+	// 		// input.Command - command
+	// 		// input.Channel - channel
+	// 		// input.Data: [1,0,0,0] on fail (device is diabled)
+	// 		// input.Data: [1,2,0,0] on fail (device is enabled but command not complete)
+	// 		fmt.Println("command:", input.Command)
+	// 		fmt.Println("channel:", input.Channel)
+	// 		fmt.Println("data:", input.Data)
+	// 		fmt.Println("datafmt:", input.DataFormat)
+	// 	}
+	// }()
+
+	// send readiness message into status topic
 	if err := cli.Publish(&client.PublishOptions{
 		QoS:       mqtt.QoS0,
 		Retain:    true,

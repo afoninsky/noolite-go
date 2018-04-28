@@ -2,6 +2,7 @@ package noolite
 
 import (
 	"errors"
+	"fmt"
 )
 
 // PacketLength ...
@@ -22,7 +23,7 @@ type Packet struct {
 	Command    byte    // <-> command
 	Address    [4]byte // <-> nooliteF device address
 	Repeat     byte    // -> amount of repeats + 2 {not realized}
-	DataFormat byte    // <- format of incoming data
+	DataFormat byte    // <-> format of incoming data or amout of outgoing
 	Data       [4]byte // <- incoming data
 	Toggle     byte    // <- nooliteF-tx - amount of packets to receive, nooliteF-rx/noolite - unique command id
 }
@@ -37,7 +38,7 @@ func crc(input []byte) byte {
 
 // Encode creates rx packet for MTRF device
 func (p Packet) Encode() []byte {
-	buf := []byte{txStart, 0, p.Control, 0, p.Channel, p.Command, 0, p.Address[0], p.Address[1], p.Address[2], p.Address[3], 0, 0, 0, 0, 0, txStop}
+	buf := []byte{txStart, 0, p.Control, 0, p.Channel, p.Command, p.DataFormat, p.Data[0], p.Data[1], p.Data[2], p.Data[3], p.Address[0], p.Address[1], p.Address[2], p.Address[3], 0, txStop}
 
 	// add mode + repeats flag
 	buf[1] = (p.Repeat << 6) | p.Mode
@@ -49,6 +50,7 @@ func (p Packet) Encode() []byte {
 
 	// count crc
 	buf[15] = crc(buf[:15])
+	fmt.Println(buf)
 	return buf
 }
 

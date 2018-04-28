@@ -19,12 +19,20 @@ Then add your user to noolite group:
 sudo usermod <user> -aG noolite
 ```
 
+/dev/ttyUSB0
+Bus 001 Device 004: ID 0403:6001 Future Technology Devices International, Ltd FT232 USB-Serial (UART) IC
+
 ### Misc
 https://www.home-assistant.io/components/light.mqtt/
 
 docker run -p 1883:1883 eclipse-mosquitto
 mosquitto_sub -v -t "#"mosquitto_pub -t "home/noolite_test/set" -m ON
-mosquitto_pub -t "home/noolitef/1/command" -m ON
+mosquitto_pub -h 192.168.1.3 -t "home/noolitef/1/command" -m ON
 
 
-docker build -t vkfont/noolite:latest .
+docker build -t vkfont/pi3-noolite:latest .
+docker run \
+    -e MQTT_HOST=192.168.1.3:1883 \
+    -e DEVICE_PORT=/dev/ttyUSB0 \
+    --device /dev/ttyUSB0 \
+    vkfont/pi3-noolite:latest

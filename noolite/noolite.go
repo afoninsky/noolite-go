@@ -15,10 +15,11 @@ type Device struct {
 }
 
 // CreateDevice returns MTRF device
-func CreateDevice() (Device, error) {
+func CreateDevice(portName string) (Device, error) {
+
 	device := Device{}
 	options := serial.OpenOptions{
-		PortName:        "/dev/tty.usbserial-AL032Z5Y",
+		PortName:        portName,
 		BaudRate:        9600,
 		DataBits:        8,
 		StopBits:        1,

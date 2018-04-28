@@ -18,13 +18,15 @@ func main() {
 	// configuration
 	viper.SetDefault("mqtt.host", "localhost:1883")
 	viper.BindEnv("mqtt.host", "MQTT_HOST")
+	viper.SetDefault("device.port", "/dev/tty.usbserial-AL032Z5Y")
+	viper.BindEnv("device.port", "DEVICE_PORT")
 
 	// handle interrupt signals
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, os.Interrupt, os.Kill)
 
 	// open noolite connected device
-	nooDevice, nooErr := noolite.CreateDevice()
+	nooDevice, nooErr := noolite.CreateDevice(viper.GetString("device.port"))
 	if nooErr != nil {
 		log.Fatalln(nooErr)
 	}

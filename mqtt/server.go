@@ -8,16 +8,16 @@ import (
 	"time"
 
 	"github.com/afoninsky/noolite-go/noolite"
+	"github.com/spf13/viper"
 	"github.com/yosssi/gmq/mqtt"
 	"github.com/yosssi/gmq/mqtt/client"
 )
 
-// https://www.home-assistant.io/components/light.mqtt/
-
 func main() {
 
-	// 2do: viper envs
-	// https://github.com/spf13/viper
+	// configuration
+	viper.SetDefault("mqtt.host", "localhost:1883")
+	viper.BindEnv("mqtt.host", "MQTT_HOST")
 
 	// handle interrupt signals
 	sigc := make(chan os.Signal, 1)
@@ -40,7 +40,7 @@ func main() {
 
 	if err := cli.Connect(&client.ConnectOptions{
 		Network:      "tcp",
-		Address:      "localhost:1883",
+		Address:      viper.GetString("mqtt.host"),
 		ClientID:     []byte(clientID),
 		CleanSession: true,
 		WillTopic:    []byte(willTopic),

@@ -2,17 +2,16 @@ package noolite
 
 import (
 	"errors"
-	"fmt"
 )
 
 // PacketLength ...
 const PacketLength = 17
 
 const (
-	txStart byte = 171
-	txStop  byte = 172
-	rxStart byte = 173
-	rxStop  byte = 174
+	txStart byte = 171 // start byte for outgoing packet
+	txStop  byte = 172 // stop byte for outgoing packet
+	rxStart byte = 173 // start byte for incoming packet
+	rxStop  byte = 174 // stop byte for incoming packet
 )
 
 // Packet contains incoming decoded data OR decode data for send
@@ -50,7 +49,6 @@ func (p Packet) Encode() []byte {
 
 	// count crc
 	buf[15] = crc(buf[:15])
-	fmt.Println(buf)
 	return buf
 }
 

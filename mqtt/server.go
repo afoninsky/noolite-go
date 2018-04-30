@@ -67,6 +67,10 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	go server.noolite.Listen(func(message noolite.Packet) {
+		log.Printf("[FEEDBACK] mode:%v, channel:%v, command:%v, data:%v", message.Mode, message.Channel, message.Command, message.Data)
+	})
+
 	// wait for events in bus
 	// go func() {
 	// 	for {

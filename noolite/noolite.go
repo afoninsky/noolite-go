@@ -1,8 +1,11 @@
 package noolite
 
 import (
+	"bufio"
 	"errors"
+	"fmt"
 	"io"
+	"log"
 
 	"github.com/jacobsa/go-serial/serial"
 )
@@ -42,7 +45,9 @@ func CreateDevice(portName string) (Device, error) {
 
 // Send raw packets
 func (device *Device) Send(packet Packet) error {
-	count, err := device.Port.Write(packet.Encode())
+	buf := packet.Encode()
+	fmt.Println("->", buf)
+	count, err := device.Port.Write(buf)
 	if err != nil {
 		return err
 	}
@@ -52,18 +57,49 @@ func (device *Device) Send(packet Packet) error {
 	return nil
 }
 
-// Receive ...
-func (device *Device) Receive() (Packet, error) {
-	packet := Packet{}
-	buf := make([]byte, PacketLength)
-	if _, readError := io.ReadFull(device.Port, buf); readError != nil {
-		return packet, readError
+func (device *Device) Listen(handler func(message Packet)) {
+	// read by one symbol and compose result into packet
+	reader := bufio.NewReader(device.Port)
+	accumulator := []byte{}
+	// func (b *Buffer) Write(p []byte) (n int, err error)
+	for {
+		buf, readError := reader.ReadBytes(rxStop)
+		if readError != nil {
+			log.Printf("ERROR: receive failed - %s", readError)
+			accumulator = []byte{}
+			continue
+		}
+		fmt.Println("<-", buf)
+		for _, item := range buf {
+			accumulator = append(accumulator, item)
+		}
+		if len(accumulator) < PacketLength {
+			// stop-byte found in the middle of a packet, ex.: checksum
+			continue
+		}
+		packet := Packet{}
+		if decodeError := packet.Decode(accumulator); decodeError != nil {
+			log.Printf("ERROR: decode failed - %s", decodeError)
+			accumulator = []byte{}
+			continue
+		}
+		go handler(packet)
+		accumulator = []byte{}
 	}
-	if decodeError := packet.Decode(buf); decodeError != nil {
-		return packet, decodeError
-	}
-	return packet, nil
 }
+
+// Receive ...
+// func (device *Device) Receive() (Packet, error) {
+// 	packet := Packet{}
+// 	buf := make([]byte, PacketLength)
+// 	if _, readError := io.ReadFull(device.Port, buf); readError != nil {
+// 		return packet, readError
+// 	}
+// 	if decodeError := packet.Decode(buf); decodeError != nil {
+// 		return packet, decodeError
+// 	}
+// 	return packet, nil
+// }
 
 // func (device *Device) enterServiceMode() error {
 // 	if sendError := device.Send(ModeSvc, 0, 0, 0); sendError != nil {

@@ -44,11 +44,7 @@ func (s *Server) messageHandler(topicName, message []byte) {
 	// enters device into bind mode
 	case "BIND":
 		packet.Control = noolite.TxCtrSnd
-		if packet.Mode == noolite.ModeTx {
-			packet.Command = noolite.TxCtrBindOn
-		} else {
-			packet.Command = noolite.CmdBind
-		}
+		packet.Command = noolite.CmdBind
 
 	// turns device on
 	case "ON":

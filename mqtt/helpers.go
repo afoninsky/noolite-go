@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const brightnessStep = 0.419
+
 func guessCommand(buf []byte) (command, payload string) {
 	input := fmt.Sprintf("%s", buf)
 	// check if brightness
@@ -30,13 +32,9 @@ func validateByteRange(input string) (byte, error) {
 	return byte(item), nil
 }
 
-// converts 0..255 brightess scale into noolite specific 35..125
+// converts 0..255 brightess scale into noolite specific
 func scaleBrightness(baseScale byte) byte {
-	if baseScale <= 0 {
-		return 0
-	}
-	if baseScale >= 255 {
-		return 126
-	}
-	return ((125 - 35) * baseScale / 255) + 35
+	// SN111-300: 43 .. 150 ?
+	// return byte(brightnessStep*float64(baseScale) + 42)
+	return byte(brightnessStep*float64(baseScale) + 42)
 }

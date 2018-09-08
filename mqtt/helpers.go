@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+// SN111-300 has brightness from 43.. 150
+// this const helps convert standart 0..255 scale to noolite specific
 const brightnessStep = 0.419
 
 func guessCommand(buf []byte) (command, payload string) {
@@ -32,9 +34,6 @@ func validateByteRange(input string) (byte, error) {
 	return byte(item), nil
 }
 
-// converts 0..255 brightess scale into noolite specific
 func scaleBrightness(baseScale byte) byte {
-	// SN111-300: 43 .. 150 ?
-	// return byte(brightnessStep*float64(baseScale) + 42)
 	return byte(brightnessStep*float64(baseScale) + 42)
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -26,10 +25,10 @@ func guessCommand(buf []byte) (command, payload string) {
 
 }
 
-func validateByteRange(input string) (byte, error) {
+func validateByteRange(input string, min, max int) (byte, error) {
 	item, err := strconv.Atoi(input)
-	if err != nil || item < 0 || item > 255 {
-		return 0, errors.New("invalid range (0..255)")
+	if err != nil || item < min || item > max {
+		return 0, fmt.Errorf("invalid range (%v..%v)", min, max)
 	}
 	return byte(item), nil
 }

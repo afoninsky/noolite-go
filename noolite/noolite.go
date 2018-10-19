@@ -90,14 +90,21 @@ func (device *Device) Listen(handler func(message Packet)) {
 
 // Receive ...
 // func (device *Device) Receive() (Packet, error) {
+// 	fmt.Println("check something...")
+// 	buf := make([]byte, 33)
+// 	if _, err := io.ReadAtLeast(device.Port, buf, 4); err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	fmt.Printf("got something: %s\n", buf)
+
 // 	packet := Packet{}
-// 	buf := make([]byte, PacketLength)
-// 	if _, readError := io.ReadFull(device.Port, buf); readError != nil {
-// 		return packet, readError
-// 	}
-// 	if decodeError := packet.Decode(buf); decodeError != nil {
-// 		return packet, decodeError
-// 	}
+// 	// buf := make([]byte, PacketLength)
+// 	// if _, readError := io.ReadFull(device.Port, buf); readError != nil {
+// 	// 	return packet, readError
+// 	// }
+// 	// if decodeError := packet.Decode(buf); decodeError != nil {
+// 	// 	return packet, decodeError
+// 	// }
 // 	return packet, nil
 // }
 

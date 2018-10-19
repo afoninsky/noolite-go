@@ -45,7 +45,7 @@ func main() {
 		Address:      viper.GetString("mqtt.host"),
 		ClientID:     []byte(clientID),
 		CleanSession: true,
-		WillTopic:    []byte(willTopic),
+		WillTopic:    []byte(fmt.Sprintf(willTopicPattern, clientID)),
 		WillMessage:  []byte(willOfflineMessage),
 		WillRetain:   true,
 	}); err != nil {
@@ -58,7 +58,7 @@ func main() {
 	if err := cli.Subscribe(&client.SubscribeOptions{
 		SubReqs: []*client.SubReq{
 			&client.SubReq{
-				TopicFilter: []byte(fmt.Sprintf(setTopicPattern, "+", "+")),
+				TopicFilter: []byte(fmt.Sprintf(setTopicPattern, clientID, "+", "+")),
 				QoS:         mqtt.QoS0,
 				Handler:     server.messageHandler,
 			},
@@ -73,20 +73,22 @@ func main() {
 
 	// wait for events in bus
 	// go func() {
+	// 	fmt.Println("run something")
 	// 	for {
-	// 		input, rcvErr := server.noolite.Receive()
-	// 		if rcvErr != nil {
-	// 			log.Println(rcvErr)
-	// 			return
-	// 		}
-	// 		// input.Command - command
-	// 		// input.Channel - channel
-	// 		// input.Data: [1,0,0,0] on fail (device is diabled)
-	// 		// input.Data: [1,2,0,0] on fail (device is enabled but command not complete)
-	// 		fmt.Println("command:", input.Command)
-	// 		fmt.Println("channel:", input.Channel)
-	// 		fmt.Println("data:", input.Data)
-	// 		fmt.Println("datafmt:", input.DataFormat)
+	// 		server.noolite.Receive()
+	// 		// input, rcvErr := server.noolite.Receive()
+	// 		// if rcvErr != nil {
+	// 		// 	log.Println(rcvErr)
+	// 		// 	return
+	// 		// }
+	// 		// // input.Command - command
+	// 		// // input.Channel - channel
+	// 		// // input.Data: [1,0,0,0] on fail (device is diabled)
+	// 		// // input.Data: [1,2,0,0] on fail (device is enabled but command not complete)
+	// 		// fmt.Println("command:", input.Command)
+	// 		// fmt.Println("channel:", input.Channel)
+	// 		// fmt.Println("data:", input.Data)
+	// 		// fmt.Println("datafmt:", input.DataFormat)
 	// 	}
 	// }()
 
@@ -94,7 +96,7 @@ func main() {
 	if err := cli.Publish(&client.PublishOptions{
 		QoS:       mqtt.QoS0,
 		Retain:    true,
-		TopicName: []byte(willTopic),
+		TopicName: []byte(fmt.Sprintf(willTopicPattern, clientID)),
 		Message:   []byte(willOnlineMessage),
 	}); err != nil {
 		log.Fatalln(err)
@@ -107,7 +109,7 @@ func main() {
 	if err := cli.Publish(&client.PublishOptions{
 		QoS:       mqtt.QoS0,
 		Retain:    true,
-		TopicName: []byte(willTopic),
+		TopicName: []byte(fmt.Sprintf(willTopicPattern, clientID)),
 		Message:   []byte(willOfflineMessage),
 	}); err != nil {
 		log.Fatalln(err)

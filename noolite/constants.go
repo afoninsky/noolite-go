@@ -59,3 +59,9 @@ const (
 	ModeSvc byte = 4
 	ModeUpd byte = 5
 )
+
+// common packet type (tx or rx)
+const (
+	PacketTypeTx byte = 0
+	PacketTypeRx byte = 1
+)

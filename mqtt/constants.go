@@ -12,13 +12,13 @@ const willOnlineMessage = "online"
 const willOfflineMessage = "offline"
 
 const setTopicPattern = "%s/%s/%s/command"
-const stateTopicPattern = "%s/%s/%s/state"
+const stateTopicPattern = "%s/%x/state"
 
 /**
 noolite/state: online|offline
 noolite/{mode}/{channel}/command: bind|on|off|brightness|rgb
-noolite/{mode}/{channel}/state: on|off
+noolite/{channel}/state: on|off|switch
 
 {mode}: tx|rx|ftx|frx
-{channel}: 1..64
+{channel}: 0..63
 */

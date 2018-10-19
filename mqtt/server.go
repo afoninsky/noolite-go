@@ -68,6 +68,29 @@ func main() {
 	}
 
 	go server.noolite.Listen(func(message noolite.Packet) {
+		if message.Type == noolite.PacketTypeTx {
+			// message from binded device
+			var command string
+			switch message.Command {
+			case noolite.CmdSwitch:
+				command = "switch"
+			case noolite.CmdOff:
+				command = "off"
+			case noolite.CmdOn:
+				command = "on"
+			default:
+				command = "unknown"
+			}
+			if err := server.mqtt.Publish(&client.PublishOptions{
+				QoS:       mqtt.QoS0,
+				TopicName: []byte(fmt.Sprintf(stateTopicPattern, clientID, message.Channel)),
+				Message:   []byte(command),
+			}); err != nil {
+				fmt.Println(err)
+			}
+
+		}
+
 		log.Printf("[FEEDBACK] mode:%v, channel:%v, command:%v, data:%v", message.Mode, message.Channel, message.Command, message.Data)
 	})
 

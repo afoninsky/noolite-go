@@ -24,7 +24,8 @@ type Packet struct {
 	Repeat     byte    // -> amount of repeats + 2 {not realized}
 	DataFormat byte    // <-> format of incoming data or amout of outgoing
 	Data       [4]byte // <- incoming data
-	Toggle     byte    // <- nooliteF-tx - amount of packets to receive, nooliteF-rx/noolite - unique command id
+	Toggle     byte    // <- nooliteF-tx - amount of packets to receive,nooliteF-rx/noolite - unique command id
+	Type       byte
 }
 
 func crc(input []byte) byte {
@@ -70,5 +71,17 @@ func (p *Packet) Decode(buf []byte) error {
 	p.Data = [4]byte{buf[7], buf[8], buf[9], buf[10]}
 	p.Address = [4]byte{buf[11], buf[12], buf[13], buf[14]}
 
+	switch p.Mode {
+	case ModeTx:
+		p.Type = PacketTypeTx
+	case ModeRx:
+		p.Type = PacketTypeTx
+	case ModeFTx:
+		p.Type = PacketTypeRx
+	case ModeFRx:
+		p.Type = PacketTypeRx
+	default:
+		return errors.New(".Decode: unsupported packet type")
+	}
 	return nil
 }

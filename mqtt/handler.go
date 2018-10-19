@@ -39,13 +39,13 @@ func (s *Server) messageHandler(topicName, message []byte) {
 	}
 
 	// get device channel
-	channel, convErr := validateByteRange(topicParts[2], 1, 64)
+	channel, convErr := validateByteRange(topicParts[2], 0, 63)
 	if convErr != nil {
 		log.Printf("ERROR: invalid device channel - %s", topicParts[2])
 		return
 	}
 	packet.Channel = channel
-	if packet.Mode == noolite.ModeFTx || packet.Mode == noolite.ModeFRx {
+	if packet.Type == noolite.PacketTypeTx {
 		packet.Control = noolite.TxCtrSndAll
 	} else {
 		packet.Control = noolite.TxCtrSnd
@@ -57,6 +57,10 @@ func (s *Server) messageHandler(topicName, message []byte) {
 	// enters device into bind mode
 	case "BIND":
 		packet.Command = noolite.CmdBind
+		if packet.Mode == noolite.ModeRx || packet.Mode == noolite.ModeFRx {
+			packet.Control = noolite.TxCtrBindOn
+			packet.Command = 0
+		}
 
 	// turns device on
 	case "ON":
@@ -101,15 +105,4 @@ func (s *Server) messageHandler(topicName, message []byte) {
 	}
 
 	log.Printf("[SUCCESS] command %s sets on channel %v", command, channel)
-
-	// // send the current state
-	// if packet.Mode == noolite.ModeTx {
-	// 	if err := s.mqtt.Publish(&client.PublishOptions{
-	// 		QoS:       mqtt.QoS0,
-	// 		TopicName: []byte(fmt.Sprintf(stateTopicPattern, clientID, parts[1], parts[2])),
-	// 		Message:   []byte(command),
-	// 	}); err != nil {
-	// 		fmt.Println(err)
-	// 	}
-	// }
 }

@@ -26,11 +26,11 @@ func (s *Server) messageHandler(topicName, message []byte) {
 	// detect device type
 	switch topicParts[1] {
 	case modeTX:
-		packet.Mode = noolite.ModeTx
+		packet.Mode = noolite.ModeTx // 0
 	case modeRX:
 		packet.Mode = noolite.ModeRx
 	case modeFTX:
-		packet.Mode = noolite.ModeFTx
+		packet.Mode = noolite.ModeFTx // 2
 	case modeFRX:
 		packet.Mode = noolite.ModeFRx
 	default:
@@ -45,22 +45,30 @@ func (s *Server) messageHandler(topicName, message []byte) {
 		return
 	}
 	packet.Channel = channel
-	if packet.Type == noolite.PacketTypeTx {
-		packet.Control = noolite.TxCtrSndAll
-	} else {
-		packet.Control = noolite.TxCtrSnd
-	}
+
+	// NOTE: jan 2017 - works for ftx but doesnt work for ft
+	// if packet.Type == noolite.PacketTypeTx {
+	// 	packet.Control = noolite.TxCtrSndAll
+	// } else {
+	// 	packet.Control = noolite.TxCtrSnd
+	// }
 
 	// handle logic based on passed payload
 	command, payload := guessCommand(message)
 	switch command {
 	// enters device into bind mode
+
+	// case "BIND":
+	// NOTE: jan 2017 - works for ftx but doesnt work for ft
+	// 	packet.Command = noolite.CmdBind
+	// 	if packet.Mode == noolite.ModeRx || packet.Mode == noolite.ModeFRx {
+	// 		packet.Control = noolite.TxCtrBindOn
+	// 		packet.Command = 0
+	// 	}
+
 	case "BIND":
 		packet.Command = noolite.CmdBind
-		if packet.Mode == noolite.ModeRx || packet.Mode == noolite.ModeFRx {
-			packet.Control = noolite.TxCtrBindOn
-			packet.Command = 0
-		}
+		packet.Control = noolite.TxCtrSnd
 
 	// turns device on
 	case "ON":

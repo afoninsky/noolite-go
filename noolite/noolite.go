@@ -26,7 +26,7 @@ func CreateDevice(portName string) (Device, error) {
 		BaudRate:        9600,
 		DataBits:        8,
 		StopBits:        1,
-		MinimumReadSize: 4,
+		MinimumReadSize: 1,
 	}
 	port, openError := serial.Open(options)
 	if openError != nil {

@@ -78,6 +78,12 @@ func main() {
 				command = "off"
 			case noolite.CmdOn:
 				command = "on"
+			case noolite.CmdBrightBack:
+				command = "brightback"
+			case noolite.CmdStopReg:
+				command = "stopreg"
+			case noolite.CmdLoadPreset:
+				command = "loadpreset"
 			default:
 				command = "unknown"
 			}
